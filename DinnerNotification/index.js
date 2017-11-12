@@ -38,7 +38,7 @@ module.exports = function (context, myTimer) {
           
         context.bindings.dinnerQueueItem = {
             address: address,
-            text: menu
+            text: 'This week dinner is: ' + menu
         }; 
         
         context.done();
