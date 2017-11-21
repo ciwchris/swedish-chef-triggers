@@ -15,7 +15,8 @@ module.exports = function (context, myTimer) {
         var meal = result.entries.reduce((oldestMeal, meal) => {
             return parseInt(meal.LastEatten._) <= (oldestMeal.lastEatten || parseInt(oldestMeal.LastEatten._))
             ? { lastEatten: parseInt(meal.LastEatten._),
-                menu: meal.RowKey._, }
+                menu: meal.RowKey._,
+                tag: meal.Tag._ }
             : oldestMeal;
         });
 
@@ -38,7 +39,7 @@ module.exports = function (context, myTimer) {
           
         context.bindings.dinnerQueueItem = {
             address: address,
-            text: menu
+            text: meal.tag + ':' + menu
         }; 
         
         context.done();
