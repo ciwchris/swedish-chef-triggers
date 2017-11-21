@@ -24,7 +24,8 @@ module.exports = function (context, myTimer) {
         var task = {
             PartitionKey: {'_':'dinner'},
             RowKey: {'_': menu},
-            LastEatten: {'_':((Date.now() * 10000) + 621355968000000000)}
+            LastEatten: {'_':((Date.now() * 10000) + 621355968000000000)},
+            Tag: {'_': meal.tag},
         };
         tableSvc.replaceEntity(tableName, task, function(error, result, response){
             if(error) throw error;
