@@ -7,7 +7,9 @@ module.exports = function (context, myTimer) {
     var botId = process.env['BotId'];
     var tableName = process.env['StorageTable'];
     var storageKey = process.env['AzureWebJobsStorage'];
+    var giphyApiKey = process.env['GiphyApiKey'];
 
+    /*
 
     var tableSvc = azure.createTableService(storageKey);
     var query = new azure.TableQuery().where("PartitionKey eq ?", "dinner");
@@ -43,34 +45,62 @@ module.exports = function (context, myTimer) {
         });
 
     });
-}
+    */
 
-function sendMessage(messageText, imageUrl) {
-    var slackbotUrl = process.env['SlackbotUrl'];
-    var slackOAuthToken = process.env['SlackOAuthToken'];
-    var channelToNotify = process.env['ChannelToNotify'];
+    context.log('beginning');
 
-    var msg = new builder.Message()
-        .address(slackbotUrl)
-        .text("This week's dinner is " + messageText);
-    msg.attachmentLayout(builder.AttachmentLayout.carousel)
-    msg.attachments([
-        new builder.AnimationCard()
-            .title('Bork bork bork!')
-            .media([ { url: imageUrl } ])
-    ]);
-
-    context.log('sending');
-
-    var requestUrl = slackbotUrl + '?channel' + encodeURIComponent(channelToNotify) + '&text=' + encodeURIComponent(messageText);
-    //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-
-    got(requestUrl, {headers: {'Authorization','Bearer ' + slackOAuthToken}}).then(response => {
-        context.log('sent success');
-        context.done();
+    got('https://api.giphy.com/v1/gifs/random?tag=' + encodeURIComponent('breakfast') + '&rating=g&api_key=' + giphyApiKey, { json: true }).then(response => {
+      context.log('gipyth');
+      sendMessage('breakfast', response.body.data.fixed_height_downsampled_url)
     }).catch(error => {
-        context.log('sent failure');
-        context.done();
+      context.log('error giphy');
+      context.log(error);
+      context.done();
+      //sendMessage(menu, 'https://media0.giphy.com/media/demgpwJ6rs2DS%2Fgiphy-downsized.gif')
     });
 
+    function sendMessage(messageText, imageUrl) {
+        var slackbotUrl = process.env['SlackbotUrl'];
+        var slackOAuthToken = process.env['SlackOAuthToken'];
+        var channelToNotify = process.env['ChannelToNotify'];
+
+        /*
+        var msg = new builder.Message()
+            .address(slackbotUrl)
+            .text("This week's dinner is " + messageText);
+        msg.attachmentLayout(builder.AttachmentLayout.carousel)
+        msg.attachments([
+            new builder.AnimationCard()
+                .title('Bork bork bork!')
+                .media([ { url: imageUrl } ])
+        ]);
+        */
+
+        context.log('sending');
+
+        var requestUrl = slackbotUrl + '?channel=' + encodeURIComponent(channelToNotify) + '&text=' + encodeURIComponent(messageText);
+        //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+        /*
+POST /api/conversations.create
+Content-type: application/json
+Authorization: Bearer xoxa-xxxxxxxxx-xxxx
+{"name":"something-urgent"}
+         */
+        context.log(requestUrl);
+        got(requestUrl, {
+            json: true,
+            headers: {
+                'Authorization':'Bearer ' + slackOAuthToken
+            }
+        }).then(response => {
+            context.log('sent success');
+            context.done();
+        }).catch(error => {
+            context.log('sent failure');
+            context.done();
+        });
+
+    }
 }
+
