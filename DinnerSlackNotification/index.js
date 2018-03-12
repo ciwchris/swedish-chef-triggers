@@ -59,6 +59,7 @@ module.exports = function (context, myTimer) {
             },
             body: {
                 "channel": channelToNotify,
+                "text": "This week's dinner is…",
                 "attachments": [
                     {
                         "title": messageText,
