@@ -49,14 +49,12 @@ module.exports = function (context, myTimer) {
 
     context.log('beginning');
 
-    got('https://api.giphy.com/v1/gifs/random?tag=' + encodeURIComponent('breakfast') + '&rating=g&api_key=' + giphyApiKey, { json: true }).then(response => {
-      context.log('gipyth');
-      sendMessage('breakfast', response.body.data.fixed_height_downsampled_url)
+    var menu = 'breakfast';
+    got('https://api.giphy.com/v1/gifs/random?tag=' + encodeURIComponent(menu) + '&rating=g&api_key=' + giphyApiKey, { json: true }).then(response => {
+      sendMessage(menu, response.body.data.fixed_height_downsampled_url)
     }).catch(error => {
-      context.log('error giphy');
       context.log(error);
-      context.done();
-      //sendMessage(menu, 'https://media0.giphy.com/media/demgpwJ6rs2DS%2Fgiphy-downsized.gif')
+      sendMessage(menu, 'https://media0.giphy.com/media/demgpwJ6rs2DS%2Fgiphy-downsized.gif')
     });
 
     function sendMessage(messageText, imageUrl) {
@@ -64,40 +62,30 @@ module.exports = function (context, myTimer) {
         var slackOAuthToken = process.env['SlackOAuthToken'];
         var channelToNotify = process.env['ChannelToNotify'];
 
-        /*
-        var msg = new builder.Message()
-            .address(slackbotUrl)
-            .text("This week's dinner is " + messageText);
-        msg.attachmentLayout(builder.AttachmentLayout.carousel)
-        msg.attachments([
-            new builder.AnimationCard()
-                .title('Bork bork bork!')
-                .media([ { url: imageUrl } ])
-        ]);
-        */
-
         context.log('sending');
 
-        var requestUrl = slackbotUrl + '?channel=' + encodeURIComponent(channelToNotify) + '&text=' + encodeURIComponent(messageText);
-        //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-
-        /*
-POST /api/conversations.create
-Content-type: application/json
-Authorization: Bearer xoxa-xxxxxxxxx-xxxx
-{"name":"something-urgent"}
-         */
-        context.log(requestUrl);
-        got(requestUrl, {
+        got(slackbotUrl, {
+            method: 'POST',
             json: true,
             headers: {
                 'Authorization':'Bearer ' + slackOAuthToken
+            },
+            body: {
+                "channel": channelToNotify,
+                "text": messageText,
+                "attachments": [
+                    {
+                        "title": "Bork bork bork!",
+                        //"text": "Optional text that appears within the attachment",
+                        "image_url": imageUrl,
+                    }
+                ]
             }
         }).then(response => {
             context.log('sent success');
             context.done();
         }).catch(error => {
-            context.log('sent failure');
+            context.log(error);
             context.done();
         });
 
