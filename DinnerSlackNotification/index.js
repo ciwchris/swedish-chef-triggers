@@ -9,8 +9,6 @@ module.exports = function (context, myTimer) {
     var storageKey = process.env['AzureWebJobsStorage'];
     var giphyApiKey = process.env['GiphyApiKey'];
 
-    /*
-
     var tableSvc = azure.createTableService(storageKey);
     var query = new azure.TableQuery().where("PartitionKey eq ?", "dinner");
     tableSvc.queryEntities(tableName, query, null, function(error, result, response) {
@@ -38,23 +36,12 @@ module.exports = function (context, myTimer) {
         context.log('meal: ' + menu);
 
         got('https://api.giphy.com/v1/gifs/random?tag=' + encodeURIComponent(meal.tag) + '&rating=g&api_key=' + giphyApiKey, { json: true }).then(response => {
-          context.log('gipyth');
           sendMessage(menu, response.body.data.fixed_height_downsampled_url)
         }).catch(error => {
+          context.log(error);
           sendMessage(menu, 'https://media0.giphy.com/media/demgpwJ6rs2DS%2Fgiphy-downsized.gif')
         });
 
-    });
-    */
-
-    context.log('beginning');
-
-    var menu = 'breakfast';
-    got('https://api.giphy.com/v1/gifs/random?tag=' + encodeURIComponent(menu) + '&rating=g&api_key=' + giphyApiKey, { json: true }).then(response => {
-      sendMessage(menu, response.body.data.fixed_height_downsampled_url)
-    }).catch(error => {
-      context.log(error);
-      sendMessage(menu, 'https://media0.giphy.com/media/demgpwJ6rs2DS%2Fgiphy-downsized.gif')
     });
 
     function sendMessage(messageText, imageUrl) {
@@ -72,11 +59,10 @@ module.exports = function (context, myTimer) {
             },
             body: {
                 "channel": channelToNotify,
-                "text": messageText,
                 "attachments": [
                     {
-                        "title": "Bork bork bork!",
-                        //"text": "Optional text that appears within the attachment",
+                        "title": messageText,
+                        "text": "Bork bork bork!",
                         "image_url": imageUrl,
                     }
                 ]
@@ -88,7 +74,6 @@ module.exports = function (context, myTimer) {
             context.log(error);
             context.done();
         });
-
     }
 }
 
