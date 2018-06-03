@@ -36,7 +36,8 @@ module.exports = function (context, myTimer) {
         context.log('meal: ' + menu);
 
         got('https://api.giphy.com/v1/gifs/random?tag=' + encodeURIComponent(meal.tag) + '&rating=g&api_key=' + giphyApiKey, { json: true }).then(response => {
-          sendMessage(menu, response.body.data.fixed_height_downsampled_url)
+          //sendMessage(menu, response.body.data.fixed_height_downsampled_url)
+          sendMessage("BYOMASTS", 'https://media0.giphy.com/media/demgpwJ6rs2DS%2Fgiphy-downsized.gif')
         }).catch(error => {
           context.log(error);
           sendMessage(menu, 'https://media0.giphy.com/media/demgpwJ6rs2DS%2Fgiphy-downsized.gif')
